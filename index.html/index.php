@@ -6,7 +6,7 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Project/PHP/PHPProject.php to edi
 <html>
     <head>
         <meta charset="UTF-8">
-        <title></title>
+        <title>hh</title>
     </head>
     <body>
         <p>hhh</p>
