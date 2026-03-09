@@ -103,10 +103,10 @@ Click nbfs://nbhost/SystemFileSystem/Templates/Project/PHP/PHPProject.php to edi
             <p>Celebrate the art of clean and healthy baking. Share your recipes, discover healthy desserts, and join a community passionate about mindful sweetness!</p>
             
             <div class="cta-buttons">
-                <a href="login.html" class="btn btn-primary btn-large">Log In</a>
+                <a href="login.php" class="btn btn-primary btn-large">Log In</a>
             </div>
             
-            <p class="new-user-text">New user? <a href="signup.html" class="signup-link">Create a new account</a></p>
+            <p class="new-user-text">New user? <a href="signup.php" class="signup-link">Create a new account</a></p>
 
             <div class="features">
                 <div class="feature">
