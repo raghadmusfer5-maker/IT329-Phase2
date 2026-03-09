@@ -109,7 +109,7 @@
         <h2>Create Account</h2>
         <p class="subtitle">Join SweetCrumb Bakery</p>
 
-        <form id="signupForm" action="user.html" method="post" enctype="multipart/form-data">
+        <form id="signupForm" action="signup_process.php" method="post" enctype="multipart/form-data">
 
             <div class="form-group">
                 <label for="firstName">First Name</label>
