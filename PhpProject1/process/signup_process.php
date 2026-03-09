@@ -96,7 +96,7 @@ $_SESSION['userType'] = "user";
 
 // 8️⃣ redirect to user page
 
-header("Location: ../userPage.php");
+header("Location: ../user.php");
 exit();
 
 ?>
