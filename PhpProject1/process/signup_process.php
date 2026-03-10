@@ -8,7 +8,8 @@ $lastName = $_POST['last_name'];
 $email = $_POST['email'];
 $password = $_POST['password'];
 
-// 1️⃣ check if email already exists in User table
+
+// 1️⃣ check if email already exists in user table
 
 $sql = "SELECT * FROM user WHERE emailAddress = ?";
 $stmt = $conn->prepare($sql);
@@ -21,7 +22,8 @@ header("Location: ../signup.php?error=emailExists");
 exit();
 }
 
-// 2️⃣ check if email exists in BlockedUser table
+
+// 2️⃣ check blocked users
 
 $sql = "SELECT * FROM blockeduser WHERE emailAddress = ?";
 $stmt = $conn->prepare($sql);
@@ -35,56 +37,52 @@ exit();
 }
 
 
-
 // 3️⃣ hash password
 
 $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
 
+// 4️⃣ handle image upload
 
-// 4️⃣ handle photo upload
+if(isset($_FILES['profile_image']) && $_FILES['profile_image']['name'] != ""){
 
-if($_FILES['profile_image']['name'] != ""){
-
-$photoName = time() . "_" . $_FILES['photo']['name'];
+$photoName = time() . "_" . $_FILES['profile_image']['name'];
 
 move_uploaded_file(
 $_FILES['profile_image']['tmp_name'],
 "../images/" . $photoName
 );
 
-}
-
-else{
+}else{
 
 $photoName = "default-user.jpg";
 
 }
 
 
+// 5️⃣ insert new user
 
-// 5️⃣ insert user into database
+$sql = "INSERT INTO user
+(userType, firstName, lastName, emailAddress, password, photoFileName)
+VALUES ('user', ?, ?, ?, ?, ?)";
 
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("sssss", $firstName, $lastName, $email, $hashedPassword, $photoName);
 $stmt->execute();
 
 
+// 6️⃣ get inserted ID
 
-// 6️⃣ get inserted user id
-
-$userID = $conn->lastInsertId();
-
+$userID = $conn->insert_id;
 
 
-// 7️⃣ create session variables
+// 7️⃣ create session
 
 $_SESSION['userID'] = $userID;
 $_SESSION['userType'] = "user";
 
 
-
-// 8️⃣ redirect to user page
+// 8️⃣ redirect
 
 header("Location: ../user.php");
 exit();
