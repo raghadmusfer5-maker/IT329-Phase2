@@ -3,7 +3,13 @@
 session_start();
 require_once("config/db.php");
 
+
 if(!isset($_SESSION['userID'])){
+    header("Location: login.php");
+    exit();
+}
+
+if($_SESSION['userType'] != "user"){
     header("Location: login.php");
     exit();
 }
@@ -129,7 +135,7 @@ $user = $result->fetch_assoc();
   <!-- Welcome -->
   <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
     <div class="welcome">Welcome <?php echo $user['firstName']; ?>!</div>
-    <a href="Home.html" class="link">Sign out</a>
+    <a href="process/logout.php" class="link">Sign out</a>
   </div>
 
   <!-- User Information -->
