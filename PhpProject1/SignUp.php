@@ -5,7 +5,7 @@
     <title>Sign Up - SweetCrumb</title>
     <link rel="stylesheet" href="style.css">
     <script src="script.js" defer></script>
-</head>
+</head> <!-- Dhay testing pull and push-->
 
 <body>
 <header>
