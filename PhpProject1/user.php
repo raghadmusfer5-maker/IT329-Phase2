@@ -108,7 +108,7 @@ $user = $result->fetch_assoc();
     
     <text x="12" y="9" font-family="'Segoe UI', Arial, sans-serif" 
           font-size="11" fill="#d4a5a5" letter-spacing="3" font-weight="500" opacity="0.9">
-      HEALTHY BAKER
+      HEALTHY BAKERY
     </text>
   </g>
   
