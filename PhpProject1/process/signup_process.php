@@ -3,35 +3,35 @@
 session_start();
 require_once("../config/db.php");
 
-$firstName = $_POST['firstName'];
-$lastName = $_POST['lastName'];
+$firstName = $_POST['first_name'];
+$lastName = $_POST['last_name'];
 $email = $_POST['email'];
 $password = $_POST['password'];
 
 // 1️⃣ check if email already exists in User table
 
-$sql = "SELECT * FROM User WHERE emailAddress = ?";
+$sql = "SELECT * FROM user WHERE emailAddress = ?";
 $stmt = $conn->prepare($sql);
-$stmt->execute([$email]);
+$stmt->bind_param("s", $email);
+$stmt->execute();
+$result = $stmt->get_result();
 
-if($stmt->rowCount() > 0){
-
+if($result->num_rows > 0){
 header("Location: ../signup.php?error=emailExists");
 exit();
-
 }
 
 // 2️⃣ check if email exists in BlockedUser table
 
-$sql = "SELECT * FROM BlockedUser WHERE emailAddress = ?";
+$sql = "SELECT * FROM blockeduser WHERE emailAddress = ?";
 $stmt = $conn->prepare($sql);
-$stmt->execute([$email]);
+$stmt->bind_param("s", $email);
+$stmt->execute();
+$result = $stmt->get_result();
 
-if($stmt->rowCount() > 0){
-
+if($result->num_rows > 0){
 header("Location: ../signup.php?error=blocked");
 exit();
-
 }
 
 
@@ -44,13 +44,13 @@ $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
 // 4️⃣ handle photo upload
 
-if($_FILES['photo']['name'] != ""){
+if($_FILES['profile_image']['name'] != ""){
 
 $photoName = time() . "_" . $_FILES['photo']['name'];
 
 move_uploaded_file(
-$_FILES['photo']['tmp_name'],
-"../images/users/" . $photoName
+$_FILES['profile_image']['tmp_name'],
+"../images/" . $photoName
 );
 
 }
@@ -65,19 +65,9 @@ $photoName = "default-user.jpg";
 
 // 5️⃣ insert user into database
 
-$sql = "INSERT INTO User
-(userType, firstName, lastName, emailAddress, password, photoFileName)
-VALUES ('user', ?, ?, ?, ?, ?)";
-
 $stmt = $conn->prepare($sql);
-
-$stmt->execute([
-$firstName,
-$lastName,
-$email,
-$hashedPassword,
-$photoName
-]);
+$stmt->bind_param("sssss", $firstName, $lastName, $email, $hashedPassword, $photoName);
+$stmt->execute();
 
 
 
