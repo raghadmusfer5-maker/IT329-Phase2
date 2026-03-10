@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -110,7 +111,7 @@
             <h2>Welcome Back</h2>
             <p class="subtitle">Log in to your SweetCrumb account</p>
 
-            <form id="loginForm" action="user-page.html" method="post">
+            <form id="loginForm" action="process/login_process.php" method="post">
                 <div class="form-group">
                     <label for="email">Email Address</label>
                     <input type="email" id="email" name="email" placeholder="name@example.com" required>
@@ -122,19 +123,27 @@
                 </div>
 
                 <div class="login-buttons">
-                    <button type="submit" class="btn btn-primary btn-full" formaction="user.html">
-                        Login as User
-                    </button>
+                    <button type="submit" class="btn btn-primary btn-full">Log In</button>
                     
-                    <div class="divider">
-                        <span>or</span>
-                    </div>
-                    
-                    <button type="submit" class="btn btn-admin btn-full" formaction="admin.html">
-                        Login as Admin
-                    </button>
                 </div>
             </form>
+            <?php
+if(isset($_GET['error'])){
+
+if($_GET['error'] == "blocked"){
+echo "<p style='color:#8b6f47;'>Your account is blocked.</p>";
+}
+
+if($_GET['error'] == "email"){
+echo "<p style='color:#8b6f47;'>Email not found.</p>";
+}
+
+if($_GET['error'] == "password"){
+echo "<p style='color:#8b6f47;'>Incorrect password.</p>";
+}
+
+}
+?>
 
             <div class="form-footer">
                 <p>Don't have an account? <a href="signup.php">Sign Up</a></p>

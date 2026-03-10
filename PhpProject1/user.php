@@ -1,3 +1,31 @@
+<?php
+
+session_start();
+require_once("config/db.php");
+
+
+if(!isset($_SESSION['userID'])){
+    header("Location: login.php");
+    exit();
+}
+
+if($_SESSION['userType'] != "user"){
+    header("Location: login.php");
+    exit();
+}
+
+$userID = $_SESSION['userID'];
+
+$sql = "SELECT * FROM user WHERE id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $userID);
+$stmt->execute();
+$result = $stmt->get_result();
+
+$user = $result->fetch_assoc();
+
+?>
+
 <!DOCTYPE html>
 <html lang="ar">
 <head>
@@ -106,27 +134,27 @@
 
   <!-- Welcome -->
   <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
-    <div class="welcome">Welcome Sara! </div>
-    <a href="Home.html" class="link">Sign out</a>
+    <div class="welcome">Welcome <?php echo $user['firstName']; ?>!</div>
+    <a href="process/logout.php" class="link">Sign out</a>
   </div>
 
   <!-- User Information -->
   <div class="card grid">
-    <img src="images/sara.jpg" alt="User Photo" class="avatar">
+    <img src="images/<?php echo $user['photoFileName']; ?>" alt="User Photo" class="avatar">
 
     <div>
       <div class="section-title">My Information</div>
 
       <div class="info-row">
         <div class="info-label">Full Name:</div>
-        <div>Sara Ahmed</div>
+        <div><?php echo $user['firstName'] . " " . $user['lastName']; ?></div>
       </div>
 
       
 
       <div class="info-row">
         <div class="info-label">Email:</div>
-        <div>sara@email.com</div>
+        <div><?php echo $user['emailAddress']; ?></div>
       </div>
 
 

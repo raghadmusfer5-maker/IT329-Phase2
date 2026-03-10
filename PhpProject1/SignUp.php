@@ -138,7 +138,19 @@
 
             <button type="submit" class="btn btn-primary btn-full">Sign Up</button>
         </form>
+<?php
+if(isset($_GET['error'])){
 
+if($_GET['error'] == "emailExists"){
+echo "<p style='color:#8b6f47;'>This email is already registered.</p>";
+}
+
+if($_GET['error'] == "blocked"){
+echo "<p style='color:#8b6f47;'>This email belongs to a blocked user.</p>";
+}
+
+}
+?>
         <div class="form-footer">
             <p>Already have an account? <a href="login.php">Log in</a></p>
         </div>
