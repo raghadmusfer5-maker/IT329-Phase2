@@ -197,7 +197,7 @@ $user = $result->fetch_assoc();
 
       <tbody>
         <tr>
-          <td><a href="ViewRecipe.html">Lactose Free Chocolate Cake</a></td>
+          <td><a href="ViewRecipe.php">Lactose Free Chocolate Cake</a></td>
           <td><img src="images/ch cake.jpg" class="recipe-photo"></td>
           <td class="creator">
             <img src="images/maya.jpg" class="creator-photo">
@@ -208,7 +208,7 @@ $user = $result->fetch_assoc();
         </tr>
 
         <tr>
-          <td><a href="ViewRecipe.html">Pumpkin pie</a></td>
+          <td><a href="ViewRecipe.php">Pumpkin pie</a></td>
           <td><img src="images/pie.jpg" class="recipe-photo"></td>
           <td class="creator">
             <img src="images/fahad.jpg" class="creator-photo">
@@ -219,7 +219,7 @@ $user = $result->fetch_assoc();
         </tr>
 
         <tr>
-          <td><a href="ViewRecipe.html">Birthday cookie</a></td>
+          <td><a href="ViewRecipe.php">Birthday cookie</a></td>
           <td><img src="images/cookie.jpg" class="recipe-photo"></td>
           <td class="creator">
             <img src="images/raneem.jpg" class="creator-photo">
@@ -247,13 +247,13 @@ $user = $result->fetch_assoc();
 
       <tbody>
         <tr>
-          <td><a href="ViewRecipe.html">Birthday cookie</a></td>
+          <td><a href="ViewRecipe.php">Birthday cookie</a></td>
           <td><img src="images/cookie.jpg" class="recipe-photo"></td>
           <td><a href="#">Remove</a></td>
         </tr>
 
         <tr>
-          <td><a href="ViewRecipe.html">Lactose Free Chocolate Cake</a></td>
+          <td><a href="ViewRecipe.php">Lactose Free Chocolate Cake</a></td>
           <td><img src="images/ch cake.jpg" class="recipe-photo"></td>
           <td><a href="#">Remove</a></td>
         </tr>
