@@ -164,7 +164,7 @@ $user = $result->fetch_assoc();
 
   <!-- My Recipes Summary -->
   <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
-    <a href="Myrecipe.html" class="btn btn-primary">My Recipes</a>
+    <a href="Myrecipes.php" class="btn btn-primary">My Recipes</a>
     <div class="muted">
       Total recipes: <strong>1</strong> | Total likes: <strong>40</strong>
     </div>
