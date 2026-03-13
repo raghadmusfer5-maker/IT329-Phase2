@@ -1,389 +1,295 @@
 <?php
 session_start();
+require_once("config/db.php");
 
-if(!isset($_SESSION['userID'])){
+if (!isset($_SESSION['userID'])) {
     header("Location: login.php");
     exit();
+}
+
+if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+    header("Location: Myrecipes.php");
+    exit();
+}
+
+$userID = $_SESSION['userID'];
+$recipeID = (int)$_GET['id'];
+
+/* get recipe info and make sure it belongs to the logged-in user */
+$sql = "SELECT id, name, description, categoryID, photoFileName, videoFilePath
+        FROM Recipe
+        WHERE id = ? AND userID = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("ii", $recipeID, $userID);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows === 0) {
+    header("Location: Myrecipes.php");
+    exit();
+}
+
+$recipe = $result->fetch_assoc();
+
+/* get all categories */
+$catSQL = "SELECT id, categoryName FROM RecipeCategory";
+$catResult = $conn->query($catSQL);
+
+/* get ingredients */
+$ingredients = [];
+$ingSQL = "SELECT ingredientName, ingredientQuantity
+           FROM Ingredients
+           WHERE recipeID = ?";
+$ingStmt = $conn->prepare($ingSQL);
+$ingStmt->bind_param("i", $recipeID);
+$ingStmt->execute();
+$ingResult = $ingStmt->get_result();
+
+while ($row = $ingResult->fetch_assoc()) {
+    $ingredients[] = $row;
+}
+
+/* get instructions */
+$steps = [];
+$stepSQL = "SELECT step
+            FROM Instructions
+            WHERE recipeID = ?
+            ORDER BY stepOrder ASC";
+$stepStmt = $conn->prepare($stepSQL);
+$stepStmt->bind_param("i", $recipeID);
+$stepStmt->execute();
+$stepResult = $stepStmt->get_result();
+
+while ($row = $stepResult->fetch_assoc()) {
+    $steps[] = $row['step'];
 }
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Edit Recipe</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Recipe</title>
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-  <header>
-    <svg xmlns="http://www.w3.org/2000/svg" width="320" height="80" viewBox="0 0 320 80">
-  <defs>
-    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" style="stop-color:#e9bdbd;stop-opacity:1" />
-      <stop offset="50%" style="stop-color:#d4a5a5;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#e9bec2;stop-opacity:1" />
-    </linearGradient>
-    <filter id="shadow">
-      <feDropShadow dx="1" dy="2" stdDeviation="2" flood-opacity="0.3" flood-color="#8b6f47"/>
-    </filter>
-  </defs>
-  
-  <!-- Decorative background circle behind cookie -->
-  <circle cx="35" cy="40" r="24" fill="#d4a5a5" opacity="0.12"/>
-  
-  <!-- Cookie with chocolate chips -->
-  <g transform="translate(10, 15)" filter="url(#shadow)">
-    <!-- Cookie base - light brown with slight gradient -->
-    <circle cx="25" cy="25" r="16" fill="#d4a574"/>
-    <circle cx="25" cy="25" r="16" fill="url(#textGradient)" opacity="0.15"/>
-    
-    <!-- Cookie texture/bumpy edge -->
-    <circle cx="25" cy="25" r="16" fill="none" stroke="#c49563" stroke-width="1" opacity="0.6"/>
-    <circle cx="20" cy="14" r="2" fill="#c49563" opacity="0.4"/>
-    <circle cx="35" cy="18" r="1.5" fill="#c49563" opacity="0.4"/>
-    <circle cx="32" cy="32" r="2" fill="#c49563" opacity="0.4"/>
-    
-    <!-- Chocolate chips with depth - spread out naturally -->
-    <ellipse cx="18" cy="20" rx="2.5" ry="2.8" fill="#5d3a1a"/>
-    <ellipse cx="18" cy="20" rx="1.5" ry="1.8" fill="#4a2d15" opacity="0.7"/>
-    
-    <ellipse cx="31" cy="21" rx="2.2" ry="2.5" fill="#5d3a1a"/>
-    <ellipse cx="31" cy="21" rx="1.3" ry="1.5" fill="#4a2d15" opacity="0.7"/>
-    
-    <ellipse cx="23" cy="31" rx="2.4" ry="2.7" fill="#5d3a1a"/>
-    <ellipse cx="23" cy="31" rx="1.4" ry="1.7" fill="#4a2d15" opacity="0.7"/>
-    
-    <ellipse cx="15" cy="28" rx="1.8" ry="2" fill="#5d3a1a"/>
-    <ellipse cx="15" cy="28" rx="1" ry="1.2" fill="#4a2d15" opacity="0.7"/>
-    
-    <ellipse cx="33" cy="31" rx="2" ry="2.3" fill="#5d3a1a"/>
-    <ellipse cx="33" cy="31" rx="1.2" ry="1.4" fill="#4a2d15" opacity="0.7"/>
-    
-    <ellipse cx="26" cy="17" rx="1.9" ry="2.1" fill="#5d3a1a"/>
-    <ellipse cx="26" cy="17" rx="1.1" ry="1.3" fill="#4a2d15" opacity="0.7"/>
-    
-    <!-- Highlight for dimension -->
-    <circle cx="22" cy="18" r="4" fill="#fff" opacity="0.25"/>
-  </g>
-  
-  <!-- Main text: Sweet -->
-  <text x="70" y="50" font-family="Georgia, 'Times New Roman', serif" 
-        font-size="36" font-weight="700" letter-spacing="0.5" filter="url(#shadow)" fill="url(#textGradient)">Sweet</text>
-  
-  <!-- Main text: Crumb (with the b!) -->
-  <text x="185" y="50" font-family="Georgia, 'Times New Roman', serif" 
-        font-size="36" font-weight="700" letter-spacing="0.5" filter="url(#shadow)" fill="#d4a5a5">Crumb</text>
-  
-  <!-- Decorative underline swoosh -->
-  <path d="M 72 55 Q 140 58, 240 55" stroke="#e9bdbd" stroke-width="1.5" fill="none" opacity="0.5"/>
-  
-  <!-- Tagline with icon -->
-  <g transform="translate(70, 60)">
-    <!-- Small wheat icon -->
-    <g transform="scale(0.7)" opacity="0.6">
-      <line x1="4" y1="0" x2="4" y2="12" stroke="#d4a5a5" stroke-width="1.2"/>
-      <ellipse cx="4" cy="2" rx="2.5" ry="1.8" fill="#d4a5a5"/>
-      <ellipse cx="4" cy="5" rx="2.8" ry="2" fill="#d4a5a5"/>
-      <ellipse cx="4" cy="8" rx="2.5" ry="1.8" fill="#d4a5a5"/>
-    </g>
-    
-    <text x="12" y="9" font-family="'Segoe UI', Arial, sans-serif" 
-          font-size="11" fill="#d4a5a5" letter-spacing="3" font-weight="500" opacity="0.9">
-      HEALTHY BAKERY
-    </text>
-  </g>
-  
-  <!-- Decorative dots accent -->
-  <circle cx="285" cy="25" r="2" fill="#e9bdbd" opacity="0.4"/>
-  <circle cx="293" cy="28" r="1.5" fill="#d4a5a5" opacity="0.4"/>
-  <circle cx="300" cy="25" r="2.5" fill="#e9bec2" opacity="0.4"/>
-</svg>
+
+<header>
+    <h2 style="color:white; margin:0;">SweetCrumb</h2>
 </header>
 
+<nav class="breadcrumb">
+    <div class="breadcrumb-container">
+        <span class="breadcrumb-item"><a href="index.php">Home</a></span>
+        <span class="breadcrumb-separator">›</span>
+        <span class="breadcrumb-item"><a href="Myrecipes.php">My Recipes</a></span>
+        <span class="breadcrumb-separator">›</span>
+        <span class="breadcrumb-item active">Edit Recipe</span>
+    </div>
+</nav>
 
-<!-- Breadcrumb Navigation -->
-   <nav class="breadcrumb">
-       <div class="breadcrumb-container">
-           <span class="breadcrumb-item">
-               <a href="Home.html">Home</a>
-           </span>
-           <span class="breadcrumb-separator">›</span>
-           <span class="breadcrumb-item">
-               <a href="user.html">User Dashboard</a>
-           </span>
-           <span class="breadcrumb-separator">›</span>
-           <span class="breadcrumb-item">
-               <a href="Myrecipe.html">My Recipes</a>
-           </span>
-           <span class="breadcrumb-separator">›</span>
-           <span class="breadcrumb-item active">Edit Recipe</span>
-       </div>
-   </nav>
-
-   
 <div class="page-head">
-  <h2>Edit Recipe</h2>
-  <p class="small">Make changes to your recipe below — the existing details are ready for you to adjust.
-</p>
+    <h2>Edit Recipe</h2>
+    <p class="small">Update your recipe information below.</p>
 </div>
+
 <div class="page">
-  <form id="editForm" action="Myrecipe.html">
+    <form action="process/update_recipe_process.php" method="POST" enctype="multipart/form-data">
+        
+        <!-- hidden recipe id -->
+        <input type="hidden" name="recipeID" value="<?php echo $recipe['id']; ?>">
 
-    <label>Recipe Name *</label>
-    <input type="text" id="name" required>
+        <label>Recipe Name *</label>
+        <input
+            type="text"
+            name="name"
+            value="<?php echo htmlspecialchars($recipe['name']); ?>"
+            required
+        >
 
-    <label>Category *</label>
-<select id="category" required>
-  <option value="" selected disabled>Choose</option>
-    <option value="Lactose Free Cakes">Lactose Free Cakes</option>
-        <option value="Sugar Free Desserts">Sugar Free Desserts</option>
-        <option value="Healthy Bakery">Healthy Bakery</option>
-</select>
+        <label>Category *</label>
+        <select name="categoryID" required>
+            <option value="" disabled>Choose</option>
+            <?php while ($cat = $catResult->fetch_assoc()) { ?>
+                <option value="<?php echo $cat['id']; ?>"
+                    <?php if ($cat['id'] == $recipe['categoryID']) echo "selected"; ?>>
+                    <?php echo htmlspecialchars($cat['categoryName']); ?>
+                </option>
+            <?php } ?>
+        </select>
 
-    <label>Description *</label>
-    <textarea id="description" rows="4" required></textarea>
+        <label>Description *</label>
+        <textarea name="description" rows="4" required><?php echo htmlspecialchars($recipe['description']); ?></textarea>
 
-<div class="box">
-  <h3>Upload Recipe Photo</h3>
+        <div class="box">
+            <h3>Recipe Photo</h3>
 
-  <div class="photo-grid">
-    <!-- Left: upload -->
-    <div class="photo-col">
-      <div class="photo-title">New Photo</div>
-      <div class="photo-panel">
-        <input type="file" id="newPhoto" accept="image/*">
-        <p class="photo-hint">Replace only if needed</p>
-      </div>
-    </div>
+            <?php if (!empty($recipe['photoFileName'])) { ?>
+                <p class="photo-hint">Current Photo:</p>
+                <img
+                    src="images/<?php echo htmlspecialchars($recipe['photoFileName']); ?>"
+                    alt="Current Photo"
+                    style="width:220px; height:140px; object-fit:cover; border-radius:10px; margin-bottom:12px;"
+                >
+            <?php } ?>
 
-    <!-- Right: current -->
-    <div class="photo-col">
-      <div class="photo-title">Current Photo</div>
-      <div class="photo-panel photo-preview">
-        <img id="currentPhoto" alt="Current Photo">
-      </div>
-    </div>
-  </div>
-</div>
-
-    <div class="box">
-      <h3>Ingredients *</h3>
-      <div id="ingredientsContainer"></div>
-      <button type="button" class="btn btn-primary" id="addIngredientBtn">+ Add Ingredient</button>
-      <div class="smaller">Each ingredient should have name + quantity.</div>
-    </div>
-
-    <div class="box">
-      <h3>Instructions *</h3>
-      <div id="stepsContainer"></div>
-      <button type="button" class="btn btn-primary" id="addStepBtn">+ Add Step</button>
-      <div class="smaller">Add as many steps as you need.</div>
-    </div>
-
-    <div class="box">
-      <h3>Video / URL</h3>
-      <div class="row">
-        <div>
-          <label style="margin-top:0;">Upload Video (optional)</label>
-          <input type="file" id="videoFile" accept="video/*">
-
-          <label>Video URL</label>
-          <input id="videoUrl" type="url" placeholder="https://...">
+            <label>Upload New Photo</label>
+            <input type="file" name="photo" accept="image/*">
+            <p class="photo-hint">If you do not upload a new photo, the old photo will remain.</p>
         </div>
 
-        <div class="current-media">
-          <label style="margin-top:0;">Current Video</label>
-          <a id="videoLink" target="_blank" style="display:none;">Open video link</a>
-          <div id="noVideo" class="small">No current video</div>
+        <div class="box">
+            <h3>Ingredients *</h3>
+            <div id="ingredientsContainer"></div>
+            <button type="button" class="btn btn-primary" id="addIngredientBtn">+ Add Ingredient</button>
+            <div class="smaller">Each ingredient should have name + quantity.</div>
         </div>
-      </div>
-    </div>
 
-    <div class="inline">
-      <button class="btn btn-primary" type="submit">Update Recipe</button>
-      <button type="button" class="btn btn-brown" id="cancelBtn">Cancel</button>
-    </div>
-
-  </form>
-</div>
-</div>
-
-    <footer>
-        <p>&copy; 2026 SweetCrumb. Baking dreams come true.</p>
-
-        <div class="social-links">
-            <a href="https://instagram.com/sweetcrumb" class="social" aria-label="Instagram">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22"
-                   fill="currentColor" viewBox="0 0 24 24">
-                <path d="M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5zm5 5a5 5 0 100 10 5 5 0 000-10zm6-.8a1 1 0 100 2 1 1 0 000-2z"/>
-              </svg>
-            </a>
-
-            <a href="https://twitter.com/sweetcrumb" class="social" aria-label="X">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22"
-                   fill="currentColor" viewBox="0 0 24 24">
-                <path d="M19.6 2.3h2.4l-5.2 6 6.1 8h-4.8l-3.6-4.8-4.1 4.8H3.8l5.6-6.4L3.6 2.3H8l3.2 4.4z"/>
-              </svg>
-            </a>
-
-            <a href="mailto:SweetCrumb@gmail.com" class="social" aria-label="Email">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22"
-                   fill="currentColor" viewBox="0 0 24 24">
-                <path d="M4 6h16a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2zm0 2l8 5 8-5"/>
-              </svg>
-            </a>
-
-            <a href="tel:+966550886681" class="social" aria-label="Phone">
-              <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22"
-                   fill="currentColor" viewBox="0 0 24 24">
-                <path d="M6.6 10.8a15 15 0 006.6 6.6l2.2-2.2a1 1 0 011.1-.2c1.2.5 2.5.8 3.9.8a1 1 0 011 1V20a1 1 0 01-1 1C12.4 21 3 11.6 3 1a1 1 0 011-1h3.2a1 1 0 011 1c0 1.4.3 2.7.8 3.9.1.4 0 .8-.2 1.1l-2.2 2.2z"/>
-              </svg>
-            </a>
+        <div class="box">
+            <h3>Instructions *</h3>
+            <div id="stepsContainer"></div>
+            <button type="button" class="btn btn-primary" id="addStepBtn">+ Add Step</button>
+            <div class="smaller">Add as many steps as you need.</div>
         </div>
-    </footer>
-    
+
+        <div class="box">
+            <h3>Video (Optional)</h3>
+
+            <?php if (!empty($recipe['videoFilePath'])) { ?>
+                <p class="photo-hint">
+                    Current Video:
+                    <a href="<?php echo htmlspecialchars($recipe['videoFilePath']); ?>" target="_blank">Open current video</a>
+                </p>
+            <?php } else { ?>
+                <p class="photo-hint">No current video.</p>
+            <?php } ?>
+
+            <label>Upload New Video</label>
+            <input type="file" name="video" accept="video/*">
+
+            <label>Or Video URL</label>
+            <input
+                type="url"
+                name="videoURL"
+                placeholder="https://..."
+                value="<?php echo (!empty($recipe['videoFilePath']) && filter_var($recipe['videoFilePath'], FILTER_VALIDATE_URL)) ? htmlspecialchars($recipe['videoFilePath']) : ''; ?>"
+            >
+
+            <p class="photo-hint">If you do not upload a new video or enter a new URL, the old video remains.</p>
+        </div>
+
+        <div class="inline">
+            <button class="btn btn-primary" type="submit">Update Recipe</button>
+            <a href="Myrecipes.php" class="btn btn-brown">Cancel</a>
+        </div>
+    </form>
+</div>
+
+<footer>
+    <p>&copy; 2026 SweetCrumb. Baking dreams come true.</p>
+</footer>
+
 <script>
-  //to insert the first recipe
-  var recipe = {
-    name: "Lactose Free Birthday Cake",
-    category: "Lactose Free Cakes",
-    description: "Soft lactose-free cake perfect for birthdays.",
-    photo: "images/bd cake.jpg",
-    videoUrl: "https://www.youtube.com/",
-ingredients: [
-  { name: "Flour", qty: "2 cups" },
-  { name: "Sugar", qty: "1 cup" },
-  { name: "Eggs",  qty: "2" },
-  { name: "Milk",  qty: "1 cup" }
-],
-    steps: [
-      "Preheat oven to 180°C.",
-      "Mix all ingredients.",
-      "Pour into cups.",
-      "Bake for 20 minutes."
-    ]
-  };
+    var ingredientsContainer = document.getElementById("ingredientsContainer");
+    var stepsContainer = document.getElementById("stepsContainer");
 
-  // prefilled
-  document.getElementById("name").value = recipe.name;
-  document.getElementById("category").value = recipe.category;
-  document.getElementById("description").value = recipe.description;
-  document.getElementById("currentPhoto").src = recipe.photo;
-
-  var videoLink = document.getElementById("videoLink");
-  var noVideo = document.getElementById("noVideo");
-
-  if (recipe.videoUrl) {
-    videoLink.href = recipe.videoUrl;
-    videoLink.style.display = "inline";
-    noVideo.style.display = "none";
-  } else {
-    videoLink.style.display = "none";
-    noVideo.style.display = "block";
-  }
-  // to get the containers
-  var ingredientsContainer = document.getElementById("ingredientsContainer");
-  var stepsContainer = document.getElementById("stepsContainer");
-  
-  // Function to update remove buttons visibility (first step is a must!)
-  function refreshRemove(container) {
-    var rows = container.children;
-    for (var i = 0; i < rows.length; i++) {
-      var removeBtn = rows[i].querySelector(".remove-btn"); //to target the button since we have the whole row now
-      if (removeBtn) {
-        if (i === 0) {
-          removeBtn.style.display = "none";
-        } else {
-          removeBtn.style.display = "inline-block";
+    function refreshRemove(container) {
+        var rows = container.children;
+        for (var i = 0; i < rows.length; i++) {
+            var removeBtn = rows[i].querySelector(".remove-btn");
+            if (removeBtn) {
+                removeBtn.style.display = rows.length === 1 ? "none" : "inline-block";
+            }
         }
-      }
     }
-  }
-  // Function to add ingredient row
-  function addIngredient(name, qty) {
-    if (name === undefined) name = "";
-    if (qty === undefined) qty = "";
-    var row = document.createElement("div");
-    row.className = "form-row";
-    
-    var nameInput = document.createElement("input");
-    nameInput.type = "text";
-    nameInput.placeholder = "Ingredient name";
-    nameInput.value = name;
-    nameInput.required = true;
-    
-    var qtyInput = document.createElement("input");
-    qtyInput.type = "text";
-    qtyInput.placeholder = "Quantity (e.g., 2 cups)";
-    qtyInput.value = qty;
-    qtyInput.required = true;
-    
-    var removeBtn = document.createElement("button");
-    removeBtn.type = "button";
-    removeBtn.className = "remove-btn";
-    removeBtn.textContent = "Remove";
-    
-    // Add click event to remove button
-    removeBtn.onclick = function() {
-      row.remove();
+
+    function addIngredient(name = "", qty = "") {
+        var row = document.createElement("div");
+        row.className = "form-row";
+
+        var nameInput = document.createElement("input");
+        nameInput.type = "text";
+        nameInput.name = "ingredientName[]";
+        nameInput.placeholder = "Ingredient name";
+        nameInput.value = name;
+        nameInput.required = true;
+
+        var qtyInput = document.createElement("input");
+        qtyInput.type = "text";
+        qtyInput.name = "ingredientQty[]";
+        qtyInput.placeholder = "Quantity";
+        qtyInput.value = qty;
+        qtyInput.required = true;
+
+        var removeBtn = document.createElement("button");
+        removeBtn.type = "button";
+        removeBtn.className = "remove-btn";
+        removeBtn.textContent = "Remove";
+        removeBtn.onclick = function () {
+            row.remove();
+            refreshRemove(ingredientsContainer);
+        };
+
+        row.appendChild(nameInput);
+        row.appendChild(qtyInput);
+        row.appendChild(removeBtn);
+        ingredientsContainer.appendChild(row);
+        refreshRemove(ingredientsContainer);
+    }
+
+    function addStep(text = "") {
+        var row = document.createElement("div");
+        row.className = "form-row onecol";
+
+        var stepInput = document.createElement("input");
+        stepInput.type = "text";
+        stepInput.name = "step[]";
+        stepInput.placeholder = "Write the step";
+        stepInput.value = text;
+        stepInput.required = true;
+
+        var removeBtn = document.createElement("button");
+        removeBtn.type = "button";
+        removeBtn.className = "remove-btn";
+        removeBtn.textContent = "Remove";
+        removeBtn.onclick = function () {
+            row.remove();
+            refreshRemove(stepsContainer);
+        };
+
+        row.appendChild(stepInput);
+        row.appendChild(removeBtn);
+        stepsContainer.appendChild(row);
+        refreshRemove(stepsContainer);
+    }
+
+    <?php if (!empty($ingredients)) { ?>
+        <?php foreach ($ingredients as $ing) { ?>
+            addIngredient(
+                <?php echo json_encode($ing['ingredientName']); ?>,
+                <?php echo json_encode($ing['ingredientQuantity']); ?>
+            );
+        <?php } ?>
+    <?php } else { ?>
+        addIngredient();
+    <?php } ?>
+
+    <?php if (!empty($steps)) { ?>
+        <?php foreach ($steps as $step) { ?>
+            addStep(<?php echo json_encode($step); ?>);
+        <?php } ?>
+    <?php } else { ?>
+        addStep();
+    <?php } ?>
+
+    document.getElementById("addIngredientBtn").onclick = function () {
+        addIngredient();
     };
-    // Add elements to row
-    row.appendChild(nameInput);
-    row.appendChild(qtyInput);
-    row.appendChild(removeBtn);
-    
-    // Add row to container
-    ingredientsContainer.appendChild(row);
-    
-    // so the remove button doesnt appear first row
-    refreshRemove(ingredientsContainer);
-  }
-  // Function to add step row
-  function addStep(text) {
-    if (text === undefined) text = "";
-    
-    var row = document.createElement("div");
-    row.className = "form-row onecol";
-    
-    var textInput = document.createElement("input");
-    textInput.type = "text";
-    textInput.placeholder = "Step (e.g., Mix ingredients...)";
-    textInput.value = text;
-    textInput.required = true;
-    
-    var removeBtn = document.createElement("button");
-    removeBtn.type = "button";
-    removeBtn.className = "remove-btn";
-    removeBtn.textContent = "Remove";
-    
-    // Add click event to remove button
-    removeBtn.onclick = function() {
-      row.remove();
+
+    document.getElementById("addStepBtn").onclick = function () {
+        addStep();
     };
-    // Add elements to row
-    row.appendChild(textInput);
-    row.appendChild(removeBtn);
-    
-    // Add row to container
-    stepsContainer.appendChild(row);
-    
-    // so the remove buttons doesnt appear first row
-    refreshRemove(stepsContainer);
-  }
-      for (var i = 0; i < recipe.ingredients.length; i++) {
-    addIngredient(recipe.ingredients[i].name, recipe.ingredients[i].qty);
-  }
-  for (var j = 0; j < recipe.steps.length; j++) {
-    addStep(recipe.steps[j]);
-  }
-  // setting up button events
-  document.getElementById("addIngredientBtn").onclick = function() {
-    addIngredient();};
-  document.getElementById("addStepBtn").onclick = function() {
-    addStep();};
-  document.getElementById("cancelBtn").onclick = function() {
-    window.location.href = "Myrecipe.html";};
 </script>
+
 </body>
 </html>
