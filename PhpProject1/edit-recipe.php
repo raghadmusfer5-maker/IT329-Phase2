@@ -78,16 +78,18 @@ while ($row = $stepResult->fetch_assoc()) {
     <h2 style="color:white; margin:0;">SweetCrumb</h2>
 </header>
 
-<nav class="breadcrumb">
+    <nav class="breadcrumb">
     <div class="breadcrumb-container">
-        <span class="breadcrumb-item"><a href="index.php">Home</a></span>
-        <span class="breadcrumb-separator">›</span>
-        <span class="breadcrumb-item"><a href="Myrecipes.php">My Recipes</a></span>
-        <span class="breadcrumb-separator">›</span>
-        <span class="breadcrumb-item active">Edit Recipe</span>
+      <span class="breadcrumb-item"><a href="index.php">Home</a></span>
+      <span class="breadcrumb-separator">›</span>
+      <span class="breadcrumb-item"><a href="user.php">User Dashboard</a></span>
+      <span class="breadcrumb-separator">›</span>
+      <span class="breadcrumb-item"><a href="Myrecipes.php">My Recipes</a></span>
+      <span class="breadcrumb-separator">›</span>
+      <span class="breadcrumb-item active">Edit Recipe</span>
     </div>
-</nav>
-
+  </nav>
+    
 <div class="page-head">
     <h2>Edit Recipe</h2>
     <p class="small">Update your recipe information below.</p>

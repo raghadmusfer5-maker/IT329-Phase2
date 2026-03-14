@@ -97,7 +97,7 @@
     <nav class="breadcrumb">
         <div class="breadcrumb-container">
             <span class="breadcrumb-item">
-                <a href="Home.html">Home</a>
+                <a href="index.php">Home</a>
             </span>
             <span class="breadcrumb-separator">›</span>
             <span class="breadcrumb-item active">Login</span>
