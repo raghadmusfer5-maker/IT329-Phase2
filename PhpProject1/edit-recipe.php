@@ -74,9 +74,7 @@ while ($row = $stepResult->fetch_assoc()) {
 </head>
 <body>
 
-<header>
-    <h2 style="color:white; margin:0;">SweetCrumb</h2>
-</header>
+<?php require_once 'includes/header.php'; ?>
 
     <nav class="breadcrumb">
     <div class="breadcrumb-container">
@@ -187,9 +185,7 @@ while ($row = $stepResult->fetch_assoc()) {
     </form>
 </div>
 
-<footer>
-    <p>&copy; 2026 SweetCrumb. Baking dreams come true.</p>
-</footer>
+<?php require_once 'includes/footer.php'; ?>
 
 <script>
     var ingredientsContainer = document.getElementById("ingredientsContainer");
