@@ -43,7 +43,7 @@ if (!$recipe) {
     header("Location: index.php");
     exit();
 }
- 
+
 // ── Get ingredients, instructions, comments ───────────────────────────────────
 $ingResult = $conn->query("SELECT * FROM ingredients WHERE recipeID = $recipeID");
 $insResult = $conn->query("SELECT * FROM instructions WHERE recipeID = $recipeID ORDER BY id ASC");
@@ -90,6 +90,7 @@ $creatorName = $recipe['firstName'] . ' ' . $recipe['lastName'];
     <meta charset="UTF-8">
     <title>View Recipe | SweetCrumb</title>
     <link rel="stylesheet" href="style.css">
+    <script src="script.js"></script>
 </head>
  
 <body class="view-recipe-page">
@@ -107,7 +108,7 @@ $creatorName = $recipe['firstName'] . ' ' . $recipe['lastName'];
   </nav>
 <main class="recipe-card">
  
-    <!-- 10d. Action Buttons — only shown if viewer is not creator and not admin -->
+     <!-- 10d. Action Buttons — only shown if viewer is not creator and not admin -->
     <?php if (!$isCreator && !$isAdmin): ?>
     <div class="actions">
  
@@ -115,8 +116,8 @@ $creatorName = $recipe['firstName'] . ' ' . $recipe['lastName'];
         <form method="POST" action="process/recipe_actions.php" style="display:inline;">
             <input type="hidden" name="recipeID" value="<?php echo $recipeID; ?>">
             <input type="hidden" name="action"   value="favourite">
-            <button type="submit" class="outline-btn" <?php echo $alreadyFaved ? 'disabled' : ''; ?>>
-                Add to favourites
+            <button type="submit" class="outline-btn" <?php echo $alreadyFaved ? 'disabled style="background:#ccc; color:#666; border:2px solid #ccc; cursor:not-allowed;"' : ''; ?>>
+                <?php echo $alreadyFaved ? 'Added ✓' : 'Add to favourites'; ?>
             </button>
         </form>
  
@@ -124,8 +125,8 @@ $creatorName = $recipe['firstName'] . ' ' . $recipe['lastName'];
         <form method="POST" action="process/recipe_actions.php" style="display:inline;">
             <input type="hidden" name="recipeID" value="<?php echo $recipeID; ?>">
             <input type="hidden" name="action"   value="like">
-            <button type="submit" class="pink-btn" <?php echo $alreadyLiked ? 'disabled' : ''; ?>>
-                Like (<span id="likeCount"><?php echo $likeCount; ?></span>)
+            <button type="submit" class="pink-btn" <?php echo $alreadyLiked ? 'disabled style="background:#ccc; color:#666; border:2px solid #ccc; cursor:not-allowed;"' : ''; ?>>
+                <?php echo $alreadyLiked ? 'Liked ✓' : 'Like'; ?> (<span id="likeCount"><?php echo $likeCount; ?></span>)
             </button>
         </form>
  
@@ -133,14 +134,14 @@ $creatorName = $recipe['firstName'] . ' ' . $recipe['lastName'];
         <form method="POST" action="process/recipe_actions.php" style="display:inline;">
             <input type="hidden" name="recipeID" value="<?php echo $recipeID; ?>">
             <input type="hidden" name="action"   value="report">
-            <button type="submit" class="dark-btn" <?php echo $alreadyReported ? 'disabled' : ''; ?>>
-                Report
+            <button type="submit" class="dark-btn" <?php echo $alreadyReported ? 'disabled style="background:#ccc; color:#666; border:2px solid #ccc; cursor:not-allowed;"' : ''; ?>>
+                <?php echo $alreadyReported ? 'Reported ✓' : 'Report'; ?>
             </button>
         </form>
  
     </div>
     <?php endif; ?>
- 
+
     <!-- Title -->
     <h2><?php echo htmlspecialchars($recipe['name']); ?></h2>
  
@@ -222,7 +223,7 @@ $creatorName = $recipe['firstName'] . ' ' . $recipe['lastName'];
  
 </main>
  
-<script src="script.js"></script>
+
  
 <?php require_once 'includes/footer.php'; ?>
  

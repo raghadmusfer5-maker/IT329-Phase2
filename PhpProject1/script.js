@@ -158,12 +158,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // view recipe page js code
 
-let likes = 15;
 
-function likeRecipe() {
-    likes++;
-    document.getElementById("likeCount").textContent = likes;
-}
 
 function addComment() {
     const input = document.getElementById("commentInput");
