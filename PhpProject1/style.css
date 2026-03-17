@@ -500,7 +500,7 @@ ul, ol {
 
 .outline-btn {
     background: transparent;
-    border: 2px solid #8b6f47 !important;
+    border: 2px solid #8b6f47;
     color: #8b6f47;
 }
 
@@ -552,12 +552,18 @@ ul, ol {
     margin-left: 0;
     padding: 10px 24px;
     font-size: 0.95rem;
-    border-radius: 8px;
+    border-radius: 8px; 
     box-shadow: 0 4px 8px rgba(212, 165, 165, 0.3);
     transition: all 0.3s ease;
     display: block;
     margin-top: 0;
     height: auto;
+}
+
+.comments-section button {
+    border: none;        /* removes the black border */
+    outline: none;       /* removes the focus outline */
+    cursor: pointer;     
 }
 
 .comments-section button:hover {
